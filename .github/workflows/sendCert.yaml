@@ -6,6 +6,8 @@ on:
 
 jobs:
   generate-badge:
+    environment:
+      name: pr-secrets
     runs-on: ubuntu-latest
 
     steps:
