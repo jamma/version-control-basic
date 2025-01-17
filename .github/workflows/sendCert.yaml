@@ -24,8 +24,8 @@ jobs:
 
       - name: Install libGL
         run: |
-          apt-get update
-          apt-get install -y libgl1
+          sudo apt-get update
+          sudo apt-get install -y libgl1
 
       - name: Fetch User Full Name
         id: fetch_user_details
