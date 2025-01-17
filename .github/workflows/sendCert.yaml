@@ -6,6 +6,7 @@ on:
 
 jobs:
   generate-badge:
+    environment: pr-secrets  # Use the environment with secrets
     runs-on: ubuntu-latest
 
     steps:
