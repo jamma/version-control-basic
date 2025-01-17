@@ -42,9 +42,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
-          output=$(python generate_badge.py generate_badge("$USER_FULL_NAME", "$USER_NAME", "github-basic"))
+          output=$(python generate_badge.py "$USER_FULL_NAME" "$USER_NAME" "github-basic")
           echo "image_path=${output}" >> $GITHUB_OUTPUT
-
+          
       - name: Upload badge image
         uses: actions/upload-artifact@v3
         with:

@@ -12,6 +12,8 @@ from cryptography.hazmat.backends import default_backend
 import io
 import base64
 import os
+import logging
+import sys
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,6 +21,21 @@ y_draw = 20
 
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
+
+if os.getenv("LOG_LEVEL"):
+    log_level = os.getenv("LOG_LEVEL")
+else:
+    log_level = "CRITICAL"
+
+numeric_level = getattr(logging, log_level.upper(), None)
+if not isinstance(numeric_level, int):
+    raise ValueError(f"Invalid log level: {log_level}")
+
+logging.basicConfig(
+    level=numeric_level,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    stream=sys.stdout
+)
 
 def update_dynamodb_table(timename, timestamp, name, username, table_name="github-basic"):
     # Create a DynamoDB resource
@@ -47,15 +64,15 @@ def update_dynamodb_table(timename, timestamp, name, username, table_name="githu
             ReturnValues="UPDATED_NEW"
         )
         
-        print("UpdateItem succeeded:")
-        print(response)
+        logging.debug("UpdateItem succeeded:")
+        logging.debug(response)
         return response
     
     except ClientError as e:
-        print(f"Error updating item: {e.response['Error']['Message']}")
+        logging.debug(f"Error updating item: {e.response['Error']['Message']}")
         return None
     except NoCredentialsError:
-        print("Credentials not available")
+        logging.debug("Credentials not available")
         return None
 
 # Function to load a private key from an environment variable
@@ -107,8 +124,8 @@ def sign_image(image_path):
     signed_image_path = image_path
     image.save(signed_image_path, format="WEBP")
 
-    print(f"Image signed and saved successfully to '{signed_image_path}'!")
-    print(f"Signature embedded in metadata: {signature_hex}")
+    logging.debug(f"Image signed and saved successfully to '{signed_image_path}'!")
+    logging.debug(f"Signature embedded in metadata: {signature_hex}")
 
 def break_into_lines(text, max_length=20):
     # Define a regex pattern to split on punctuation (except apostrophes and other pronunciation marks)
@@ -132,7 +149,7 @@ def drawTextCenteredFit(draw, image_size, text, font_path, fill, max_width=550, 
     # Break text into lines
     for line in break_into_lines(text, max_length=15 + len(text)/5):
         lines.append({"content": line})
-    print(lines)
+    logging.debug(lines)
     # Adjust font size until the text fits within the bounds
     while True:
         font = ImageFont.truetype(font_path, font_size)
@@ -258,7 +275,7 @@ def generate_badge(name, username, tablename):
     timename = (f"{timestamp}_{safe_name}")[:255]
     output_file = os.path.join(here, "output", f"{timename}_badge.webp")
     os.makedirs(os.path.join(here, "output"), exist_ok=True)
-    print(output_file)
+    logging.debug(output_file)
     
 
     # Add certification text
@@ -274,7 +291,7 @@ def generate_badge(name, username, tablename):
 
     # Generate QR code
     verify_url = f"https://codecollective.us/verify.html?timename={timename}&tablename={tablename}"
-    print(f"Verify URL: {verify_url}")
+    logging.debug(f"Verify URL: {verify_url}")
     qr = qrcode.QRCode(box_size=10, border=1)
     qr.add_data(verify_url)
     qr.make(fit=True)
@@ -295,18 +312,23 @@ def generate_badge(name, username, tablename):
     final_image = np.array(pil_image)
     cv2.imwrite(output_file, final_image)
 
-    print(f"Badge with text and QR code saved to {output_file}")
+    logging.debug(f"Badge with text and QR code saved to {output_file}")
     sign_image(output_file)
-    print("Image Signed")
+    logging.debug("Image Signed")
 
-    print("Updating DB")
+    logging.debug("Updating DB")
     update_dynamodb_table(timename=timename, timestamp=timestamp, name=name, username=username, table_name=tablename)
-    print("DB Updated")
+    logging.debug("DB Updated")
 
+    print(output_file)
     return output_file
 
 if __name__ == "__main__":
-    generate_badge("Julian Coy", "julianfl0w", 'github-basic')
+    full_name = sys.argv[1]
+    username = sys.argv[2]
+    badge_type = sys.argv[3]
+    generate_badge(full_name, username, badge_type)
+    #generate_badge("Julian Coy", "julianfl0w", 'github-basic')
     #generate_badge("Julian Coy Loiacono", "julianfl0w", 'github-basic')
     #generate_badge("Nicholas If-Jesus-Christ-had-not-died-for-thee-thou-hadst-been-damned Barebone", "cyberbone", 'github-basic')
     #generate_badge("Pablo Diego José Francisco de Paula Juan Nepomuceno María de los Remedios Cipriano de la Santísima Trinidad Martyr Patricio Clito Ruíz y Picasso", "PabloSlays", 'github-basic')
