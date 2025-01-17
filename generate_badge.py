@@ -14,13 +14,12 @@ import base64
 import os
 import logging
 import sys
+import boto3
+from botocore.exceptions import NoCredentialsError, ClientError
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 y_draw = 20
-
-import boto3
-from botocore.exceptions import NoCredentialsError, ClientError
 
 if os.getenv("LOG_LEVEL"):
     log_level = os.getenv("LOG_LEVEL")
@@ -36,6 +35,37 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     stream=sys.stdout
 )
+
+def upload_to_s3(file_path, bucket_name, s3_key):
+    """
+    Uploads a file to an S3 bucket.
+    :param file_path: Path to the file to upload.
+    :param bucket_name: Name of the S3 bucket.
+    :param s3_key: Key (path) in the S3 bucket where the file will be stored.
+    :return: True if the upload was successful, False otherwise.
+    """
+    try:
+        # Initialize the S3 client
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.getenv("AWS_DEFAULT_REGION")
+        )
+        
+        # Upload the file
+        s3_client.upload_file(file_path, bucket_name, s3_key)
+        logging.debug(f"File uploaded successfully to s3://{bucket_name}/{s3_key}")
+        return f"s3://{bucket_name}/{s3_key}"
+    except FileNotFoundError:
+        logging.debug(f"The file {file_path} was not found.")
+        return False
+    except NoCredentialsError:
+        logging.debug("AWS credentials not available.")
+        return False
+    except ClientError as e:
+        logging.debug(f"Error uploading file to S3: {e}")
+        return False
 
 def update_dynamodb_table(timename, timestamp, name, username, table_name="github-basic"):
     # Create a DynamoDB resource
@@ -78,7 +108,6 @@ def update_dynamodb_table(timename, timestamp, name, username, table_name="githu
 # Function to load a private key from an environment variable
 def load_private_key_from_env():
     # Get the private key from the environment variable
-
     privkey = os.getenv("PRIVKEY_BASE64")
     if privkey is None:
         raise Exception("PRIVKEY_BASE64 env var not found")
@@ -254,7 +283,6 @@ def generate_hex(image_size, font_large):
     return pil_image, draw
 
 def generate_badge(name, username, tablename):
-
     time = datetime.now(timezone.utc)  # Get the current time in UTC
     timestamp = time.strftime("%Y-%m-%d_%H:%M:%S_%Z")  # Include timezone name
 
@@ -320,8 +348,17 @@ def generate_badge(name, username, tablename):
     update_dynamodb_table(timename=timename, timestamp=timestamp, name=name, username=username, table_name=tablename)
     logging.debug("DB Updated")
 
-    print(output_file)
-    return output_file
+    # Upload the image to S3
+    bucket_name = "codecollectivecerts"  # Replace with your S3 bucket name
+    s3_key = f"{os.path.basename(output_file)}"  # S3 key (path) for the file
+    if upload_to_s3(output_file, bucket_name, s3_key):
+        logging.debug(f"Image uploaded to S3: s3://{bucket_name}/{s3_key}")
+    else:
+        logging.debug("Failed to upload image to S3.")
+
+    artifact_url = f"https://{bucket_name}.s3.{AWS_DEFAULT_REGION}.amazonaws.com/{s3_key}"
+    print(artifact_url)
+    return artifact_url
 
 # Function to get a value from either command-line arguments or environment variables
 def get_arg_or_env(index, env_name):
@@ -342,15 +379,3 @@ if __name__ == "__main__":
     AWS_DEFAULT_REGION = get_arg_or_env(7, "AWS_DEFAULT_REGION")
 
     generate_badge(full_name, username, badge_type)
-    #generate_badge("Julian Coy", "julianfl0w", 'github-basic')
-    #generate_badge("Julian Coy Loiacono", "julianfl0w", 'github-basic')
-    #generate_badge("Nicholas If-Jesus-Christ-had-not-died-for-thee-thou-hadst-been-damned Barebone", "cyberbone", 'github-basic')
-    #generate_badge("Pablo Diego José Francisco de Paula Juan Nepomuceno María de los Remedios Cipriano de la Santísima Trinidad Martyr Patricio Clito Ruíz y Picasso", "PabloSlays", 'github-basic')
-    
-    # generate blank badge
-    if False:
-        font_path = "./nofile"  # Adjust font path as needed
-        pil_image, draw = generate_hex(image_size=1920, font_large=ImageFont.truetype(font_path, 1920//10))
-        # Save the final image
-        final_image = np.array(pil_image)
-        cv2.imwrite("github-basic.webp", final_image)

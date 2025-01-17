@@ -13,7 +13,6 @@ jobs:
       issues: write
       pull-requests: write
 
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -33,8 +32,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgl1
 
-          
-
       - name: Run generate_badge.py with user details
         id: generate_badge
         env:
@@ -49,7 +46,7 @@ jobs:
             echo "AWS credentials are missing"
           fi
           output=$(python generate_badge.py "$USER_FULL_NAME" "$USER_NAME" "github-basic")
-          echo "image_path=${output}" >> $GITHUB_OUTPUT
+          echo "badge_url=${output}" >> $GITHUB_OUTPUT  # Capture the URL output
 
       - name: Upload badge image
         uses: actions/upload-artifact@v3
@@ -62,11 +59,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            const path = '${{ steps.generate_badge.outputs.image_path }}';
-            const image = fs.readFileSync(path, { encoding: 'base64' });
-            console.log(image);
-            const comment = `![Badge](data:image/webp;base64,${image})`;
+            // Get the badge URL from the output of the Python script
+            const badgeUrl = '${{ steps.generate_badge.outputs.badge_url }}';
+            
+            // Create a comment with the badge URL
+            const comment = `Here is the badge: ${badgeUrl}`;
       
             // Fetch the PR associated with the commit (if any)
             const commitSha = '${{ github.sha }}';
