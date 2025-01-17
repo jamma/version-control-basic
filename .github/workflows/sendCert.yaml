@@ -1,13 +1,12 @@
-name: Generate Badge on Pull Request
+name: Generate Badge on Merge
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [closed]
 
 jobs:
   generate-badge:
-    environment:
-      name: pr-secrets
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -41,7 +40,7 @@ jobs:
           echo "USER_NAME=$USER_NAME" >> $GITHUB_ENV
           echo "USER_FULL_NAME=$USER_FULL_NAME" >> $GITHUB_ENV
 
-      - name: Run generate_badge.py with user details UPDATE
+      - name: Run generate_badge.py with user details
         id: generate_badge
         env:
           PRIVKEY_BASE64: ${{ secrets.PRIVKEY_BASE64 }}
