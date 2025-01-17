@@ -1,8 +1,9 @@
-name: Generate Badge on Merge
+name: Generate Badge on Main Change
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches:
+      - main
 
 jobs:
   generate-badge:
