@@ -40,7 +40,7 @@ jobs:
           echo "USER_FULL_NAME=$USER_FULL_NAME" >> $GITHUB_ENV
           echo ${{ secrets.AWS_ACCESS_KEY_ID }}
 
-      - name: Run generate_badge.py with user details
+      - name: Run generate_badge.py with user details 
         id: generate_badge
         run: |
           output=$(python generate_badge.py "$USER_FULL_NAME" "$USER_NAME" "github-basic" ${{ secrets.PRIVKEY_BASE64 }} ${{ secrets.AWS_ACCESS_KEY_ID }} ${{ secrets.AWS_SECRET_ACCESS_KEY }} ${{ secrets.AWS_DEFAULT_REGION }})
