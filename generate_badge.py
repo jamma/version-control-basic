@@ -273,7 +273,7 @@ def generate_badge(name, username, tablename):
     safe_name = re.sub(r'[^\w\-_. ]', '_', name).replace(' ', '_')  # Replace invalid characters with '_'
     safe_name = safe_name[:50]
     timename = (f"{timestamp}_{safe_name}")[:255]
-    output_file = os.path.join(here, "output", f"{timename}_badge.webp")
+    output_file = os.path.join(here, "output", f"{timename}_badge.webp").replace(":","-")
     os.makedirs(os.path.join(here, "output"), exist_ok=True)
     logging.debug(output_file)
     
