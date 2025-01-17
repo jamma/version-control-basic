@@ -60,7 +60,8 @@ jobs:
             const fs = require('fs');
             const path = '${{ steps.generate_badge.outputs.image_path }}';
             const image = fs.readFileSync(path, { encoding: 'base64' });
-            const comment = `![Badge](data:image/png;base64,${image})`;
+            console.log(image);
+            const comment = `![Badge](data:image/webp;base64,${image})`;
       
             // Fetch the PR associated with the commit (if any)
             const commitSha = '${{ github.sha }}';
