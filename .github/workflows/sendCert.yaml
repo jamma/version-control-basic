@@ -42,8 +42,14 @@ jobs:
 
       - name: Run generate_badge.py with user details UPDATED
         id: generate_badge
+        env:
+          PRIVKEY_BASE64: ${{ secrets.PRIVKEY_BASE64 }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
-          output=$(python generate_badge.py "$USER_FULL_NAME" "$USER_NAME" "github-basic" ${{ secrets.PRIVKEY_BASE64 }} ${{ secrets.AWS_ACCESS_KEY_ID }} ${{ secrets.AWS_SECRET_ACCESS_KEY }} ${{ secrets.AWS_DEFAULT_REGION }})
+          output=$(python generate_badge.py "$USER_FULL_NAME" "$USER_NAME" "github-basic" \
+            "$PRIVKEY_BASE64" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$AWS_DEFAULT_REGION")
           echo "image_path=${output}" >> $GITHUB_OUTPUT
 
       - name: Upload badge image
