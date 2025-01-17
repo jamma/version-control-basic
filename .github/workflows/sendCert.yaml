@@ -48,12 +48,6 @@ jobs:
           output=$(python generate_badge.py "$USER_FULL_NAME" "$USER_NAME" "github-basic")
           echo "badge_url=${output}" >> $GITHUB_OUTPUT  # Capture the URL output
 
-      - name: Upload badge image
-        uses: actions/upload-artifact@v3
-        with:
-          name: badge-image
-          path: ${{ steps.generate_badge.outputs.image_path }}
-
       - name: Comment on the merge
         uses: actions/github-script@v6
         with:
