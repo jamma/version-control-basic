@@ -323,10 +323,23 @@ def generate_badge(name, username, tablename):
     print(output_file)
     return output_file
 
+# Function to get a value from either command-line arguments or environment variables
+def get_arg_or_env(index, env_name):
+    if len(sys.argv) > index:
+        return sys.argv[index]
+    return os.environ.get(env_name)
+
+
 if __name__ == "__main__":
     full_name = sys.argv[1]
     username = sys.argv[2]
     badge_type = sys.argv[3]
+
+    AWS_ACCESS_KEY_ID = get_arg_or_env(4, "PRIVKEY_BASE64")
+    AWS_ACCESS_KEY_ID = get_arg_or_env(5, "AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = get_arg_or_env(6, "AWS_SECRET_ACCESS_KEY")
+    AWS_DEFAULT_REGION = get_arg_or_env(7, "AWS_DEFAULT_REGION")
+
     generate_badge(full_name, username, badge_type)
     #generate_badge("Julian Coy", "julianfl0w", 'github-basic')
     #generate_badge("Julian Coy Loiacono", "julianfl0w", 'github-basic')
