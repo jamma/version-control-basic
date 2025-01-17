@@ -22,19 +22,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Fetch User Full Name
+        id: fetch_user_details
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          USER_NAME="${{ github.event.pull_request.user.login }}"
+          USER_DETAILS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/users/$USER_NAME)
+          USER_FULL_NAME=$(echo "$USER_DETAILS" | jq -r '.name')
+          echo "USER_NAME=$USER_NAME" >> $GITHUB_ENV
+          echo "USER_FULL_NAME=$USER_FULL_NAME" >> $GITHUB_ENV
+
       - name: Run generate_badge.py with user details
         id: generate_badge
         env:
-          PRIVKEY_BASE64: ${{ secrets.PRIVKEY_BASE64 }}  # Example secret
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
+          PRIVKEY_BASE64: ${{ secrets.PRIVKEY_BASE64 }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} 
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
-          # Extract user details from the pull request event
-          USER_FULL_NAME="${{ github.event.pull_request.user.name }}"
-          USER_NAME="${{ github.event.pull_request.user.login }}"
-
-          # Run the script with user details
           output=$(python generate_badge.py generate_badge("$USER_FULL_NAME", "$USER_NAME", "github-basic"))
           echo "image_path=${output}" >> $GITHUB_OUTPUT
 
