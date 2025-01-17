@@ -22,6 +22,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install libGL
+        run: |
+          apt-get update
+          apt-get install -y libgl1
+
       - name: Fetch User Full Name
         id: fetch_user_details
         env:
@@ -44,7 +49,7 @@ jobs:
         run: |
           output=$(python generate_badge.py "$USER_FULL_NAME" "$USER_NAME" "github-basic")
           echo "image_path=${output}" >> $GITHUB_OUTPUT
-          
+
       - name: Upload badge image
         uses: actions/upload-artifact@v3
         with:
