@@ -28,17 +28,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgl1
 
-      - name: Fetch User Full Name
-        id: fetch_user_details
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          USER_NAME="${{ github.event.pull_request.user.login }}"
-          USER_DETAILS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            https://api.github.com/users/$USER_NAME)
-          USER_FULL_NAME=$(echo "$USER_DETAILS" | jq -r '.name')
-          echo "USER_NAME=$USER_NAME" >> $GITHUB_ENV
-          echo "USER_FULL_NAME=$USER_FULL_NAME" >> $GITHUB_ENV
+          
 
       - name: Run generate_badge.py with user details
         id: generate_badge
@@ -62,7 +52,7 @@ jobs:
           name: badge-image
           path: ${{ steps.generate_badge.outputs.image_path }}
 
-      - name: Comment on PR with badge image
+      - name: Comment on the merge
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -71,9 +61,24 @@ jobs:
             const path = '${{ steps.generate_badge.outputs.image_path }}';
             const image = fs.readFileSync(path, { encoding: 'base64' });
             const comment = `![Badge](data:image/png;base64,${image})`;
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
+      
+            // Fetch the PR associated with the commit (if any)
+            const commitSha = '${{ github.sha }}';
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
+              commit_sha: commitSha,
             });
+      
+            if (prs.data.length > 0) {
+              // Comment on the first PR associated with the commit
+              await github.rest.issues.createComment({
+                issue_number: prs.data[0].number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment,
+              });
+              console.log(`Commented on PR #${prs.data[0].number}`);
+            } else {
+              console.log('No PR associated with this commit. Skipping comment.');
+            }
