@@ -1,0 +1,61 @@
+name: Generate Badge on Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  generate-badge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run generate_badge.py with user details
+        id: generate_badge
+        env:
+          PRIVKEY_BASE64: ${{ secrets.PRIVKEY_BASE64 }}  # Example secret
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} 
+        run: |
+          # Extract user details from the pull request event
+          USER_FULL_NAME="${{ github.event.pull_request.user.name }}"
+          USER_NAME="${{ github.event.pull_request.user.login }}"
+
+          # Run the script with user details
+          output=$(python generate_badge.py generate_badge("$USER_FULL_NAME", "$USER_NAME", "github-basic"))
+          echo "image_path=${output}" >> $GITHUB_OUTPUT
+
+      - name: Upload badge image
+        uses: actions/upload-artifact@v3
+        with:
+          name: badge-image
+          path: ${{ steps.generate_badge.outputs.image_path }}
+
+      - name: Comment on PR with badge image
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = '${{ steps.generate_badge.outputs.image_path }}';
+            const image = fs.readFileSync(path, { encoding: 'base64' });
+            const comment = `![Badge](data:image/png;base64,${image})`;
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
