@@ -326,8 +326,9 @@ def generate_badge(name, username, tablename):
 # Function to get a value from either command-line arguments or environment variables
 def get_arg_or_env(index, env_name):
     if len(sys.argv) > index:
+        os.environ[env_name] = sys.argv[index]
         return sys.argv[index]
-    return os.environ.get(env_name)
+    return os.getenv(env_name)
 
 
 if __name__ == "__main__":
@@ -335,7 +336,7 @@ if __name__ == "__main__":
     username = sys.argv[2]
     badge_type = sys.argv[3]
 
-    AWS_ACCESS_KEY_ID = get_arg_or_env(4, "PRIVKEY_BASE64")
+    PRIVKEY_BASE64 = get_arg_or_env(4, "PRIVKEY_BASE64")
     AWS_ACCESS_KEY_ID = get_arg_or_env(5, "AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = get_arg_or_env(6, "AWS_SECRET_ACCESS_KEY")
     AWS_DEFAULT_REGION = get_arg_or_env(7, "AWS_DEFAULT_REGION")
