@@ -1,9 +1,21 @@
 
-# Contributing to [Repository Name]
+# Version Control Basic Proficiency
 
-Thank you for considering contributing to [Repository Name]! We welcome contributions from everyone. Here’s a simple guide to help you get started.
+Contributing to Code Collective's Version Control Basic Proficiency repository
+
+Successfully merging a pull request into this repository will result in a Code Collective Version Control Basic Proficiency Certification with your name and username on it. Make sure to set your name in GitHub when making an account, if you would like it to appear on this certification!
+
+This program has been run at Baltimore Code and Coffee, Code Collective, and we are scheduled to run it at Baltimore Indie Game Devs (BIG) on 
 
 ## Getting Started
+
+### 0. Install tools
+Install on your Windows, Mac, or Linux Machine
+- Git, and
+- A Grphical User Interface (GUI): GitHub Desktop, VSCode, or GitKraken, or
+- GitHub (gh) for the command line
+
+gh is highly recommended for managing your Git credentials
 
 ### 1. Fork the Repository
 
@@ -14,30 +26,21 @@ Fork the repository by clicking the "Fork" button at the top right corner of thi
 Clone your forked repository to your local machine using the following command:
 
 ```sh
-git clone https://github.com/YOUR-USERNAME/[Repository-Name].git
+git clone https://github.com/YOUR-USERNAME/version-control-basic.git
 ```
 
-Replace `YOUR-USERNAME` with your GitHub username and `[Repository-Name]` with the name of the repository.
+Replace `YOUR-USERNAME` with your GitHub username.
 
-### 3. Create a Branch
+### 3. Make Your Changes
 
-Navigate to the directory of your local repository and create a new branch for your contribution:
+Add a file named `yourname.txt` to the `names` folder. Open this file and add some content that identifies you, such as your name and a brief introduction. You may also add an image `yourimage.jpeg`. Please keep it clean and less than 1MB in size. Your GUI tool (or `git diff`) should show that it has been added. 
 
-```sh
-cd [Repository-Name]
-git checkout -b your-branch-name
-```
-
-### 4. Make Your Changes
-
-Add a file named `yourname.txt` to the `names` folder. Open this file and add some content that identifies you, such as your name and a brief introduction.
-
-### 5. Commit Your Changes
+### 4. Commit Your Changes
 
 Once you've made your changes, commit them with a descriptive message:
 
 ```sh
-git add names/yourname.txt
+git add -A
 git commit -m "Add yourname.txt to names folder"
 ```
 
@@ -46,17 +49,11 @@ git commit -m "Add yourname.txt to names folder"
 Push your changes to your forked repository:
 
 ```sh
-git push origin your-branch-name
+git push
 ```
 
 ### 7. Submit a Pull Request
 
-Go to the original repository on GitHub, and you should see a prompt to submit a pull request from your new branch. Click "Compare & pull request" and provide a descriptive title and comment for your pull request.
+Go to the original repository on GitHub, and you should see a prompt to submit a pull request from your new branch. Click "Compare & pull request" and provide a descriptive title and comment for your pull request. The session leader will need to approve it. 
 
-Congratulations! You’ve successfully contributed to [Repository Name]. We will review your pull request and merge it if everything looks good.
-
-## Need Help?
-
-If you have any questions or need further assistance, feel free to open an issue or contact one of the maintainers.
-
-Happy coding!
+Congratulations! You’ve successfully contributed to Code Collective's Version Control Basic Proficiency repository. We will review your pull request and merge it if everything looks good.
