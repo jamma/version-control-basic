@@ -88,7 +88,7 @@ git add -A
 git commit -m "Add yourname.txt to names folder"
 ```
 
-### 6. Push Your Changes
+### 5. Push Your Changes
 Push your changes to your forked repository:  
 
 <p align="center">
@@ -101,7 +101,7 @@ or, on the command line
 git push
 ```
 
-### 7. Submit a Pull Request
+### 6. Submit a Pull Request
 Go to your copy of the repository on GitHub, and you should see a prompt to submit a pull request from your new branch. Click "Compare & pull request" and provide a descriptive title and comment for your pull request. The session leader will need to approve it. 
 
 Congratulations! You’ve successfully contributed to Code Collective's Version Control Basic Proficiency repository. We will review your pull request and merge it if everything looks good.
